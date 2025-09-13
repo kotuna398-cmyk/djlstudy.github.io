@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kanji Flashcards</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Quicksand', sans-serif;
+      background-color: #ffe7e7;  /* Light background */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #222;
+    }
+
+    .container {
+      background: rgb(255, 255, 255); /* White background */
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      padding: 40px 50px;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .card {
+      font-size: 3em;
+      padding: 30px;
+      margin-bottom: 5px;
+      background: rgba(255, 255, 255, 0.9); /* Light yellowish background */
+      border: 1px solid rgb(24, 3, 89);
+      border-radius: 15px;
+      box-shadow: inset 0 0 10px rgba(10, 2, 84, 0.442);
+      transition: all 0.3s ease-in-out;
+      font-family: "BIZ UDMincho", "BIZ UcMincho", serif;
+    }
+
+    #reading {
+      font-size: 1.5em;
+      color: #000000;
+      margin-bottom: 30px;
+      font-family: "MS Mincho", serif;
+      min-height: 1.8em; /* Keep height fixed */
+      transition: opacity 0.3s ease;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    button {
+      flex: 1 1 45%;
+      padding: 12px 20px;
+      font-size: 1em;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      background: rgba(45, 216, 255, 0.528);
+      color: #000000;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.485);
+      backdrop-filter: none;
+    }
+
+    button:hover {
+      background: rgba(69.658%, -0.04849, -0.15607, 0.638);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(69.658%, -0.04849, -0.15607, 0.638);
+    }
+
+    @media (max-width: 500px) {
+      .card {
+        font-size: 2em;
+      }
+      .button-group {
+        flex-direction: column;
+      }
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="card" id="kanji">赤い</div>
+    <div id="reading"></div>
+
+    <!-- Top Button Group: Show / Hide -->
+    <div class="button-group">
+      <button onclick="showReading()">Show</button>
+      <button onclick="hideReading()">Hide</button>
+    </div>
+
+    <!-- Bottom Button Group: Back / Next -->
+    <div class="button-group">
+      <button onclick="previousCard()">Back</button>
+      <button onclick="nextCard()">Next</button>
+    </div>
+  </div>
+
+  <script>
+    const flashcards = [
+       { kanji: "山", reading: "やま" },
+    { kanji: "富士山", reading: "ふじさん" },
+      { kanji: "登山", reading: "とざん" },
+       { kanji: "川", reading: "かわ" },
+       { kanji: "山川さん", reading: "やまかわさん" },
+       { kanji: "インダス川", reading: "いんだすがわ" },
+       { kanji: "田", reading: "たんぼ" },
+       { kanji: "山田さん", reading: "やまださん" },
+       { kanji: "水田", reading: "すいでん" },
+       { kanji: "油田", reading: "ゆだん" },
+       { kanji: "日", reading: "ひ、にち" },
+       { kanji: "日曜日", reading: "にちようび" },
+       { kanji: "日本", reading: "にほん" },
+       { kanji: "休日", reading: "きゅうじつ" },
+       { kanji: "月", reading: "つき" },
+       { kanji: "月曜日", reading: "げつようび" },
+       { kanji: "一月", reading: "いちがつ" },
+       { kanji: "今月", reading: "こんげつ" },
+       { kanji: "火", reading: "ひ" },
+       { kanji: "火曜日", reading: "かようび" },
+       { kanji: "火山", reading: "かざん" },
+       { kanji: "火事", reading: "かじ" },
+       { kanji: "水", reading: "みず" },
+       { kanji: "水曜日", reading: "すいようび" },
+       { kanji: "水田", reading: "すいでん" },
+       { kanji: "水道", reading: "すいどう" },
+       { kanji: "木", reading: "き" },
+       { kanji: "木曜日", reading: "もくようび" },
+       { kanji: "お金", reading: "おかね" },
+       { kanji: "金", reading: "きん" },
+       { kanji: "金曜日", reading: "きんようび" },
+       { kanji: "土", reading: "つち" },
+       { kanji: "土曜日", reading: "どよいび" },
+       { kanji: "土地", reading: "とち" },
+       { kanji: "一つ", reading: "ひとつ" },
+       { kanji: "一月", reading: "いちがつ" },
+       { kanji: "一日", reading: "いちにち、ついたち" },
+       { kanji: "二つ", reading: "ふたつ" },
+       { kanji: "二月", reading: "にがつ" },
+       { kanji: "二日", reading: "ふつか" },
+       { kanji: "二人", reading: "ふたり" },
+       { kanji: "三つ", reading: "みっつ" },
+       { kanji: "三月", reading: "さんがつ" },
+       { kanji: "三日", reading: "みっか" },
+       { kanji: "三角", reading: "さんかく" },
+       { kanji: "四", reading: "よん" },
+       { kanji: "四つ", reading: "よっつ" },
+       { kanji: "四月", reading: "しがつ" },
+       { kanji: "四日", reading: "よっか" },
+       { kanji: "五つ", reading: "いつつ" },
+       { kanji: "五月", reading: "ごがつ" },
+       { kanji: "五日", reading: "いつか" },
+       { kanji: "六つ", reading: "むっつ" },
+       { kanji: "六月", reading: "ろくがつ" },
+       { kanji: "六日", reading: "むいか" },
+       { kanji: "六本木", reading: "ろっぽんぎ" },
+       { kanji: "七", reading: "なな" },
+       { kanji: "七月", reading: "しちがつ" },
+       { kanji: "七日", reading: "なのか" },
+       { kanji: "八つ", reading: "やっつ" },
+       { kanji: "八月", reading: "はちがつ" },
+       { kanji: "八百屋", reading: "やおや" },
+       { kanji: "九つ", reading: "ここのつ" },
+       { kanji: "九", reading: "きゅう" },
+       { kanji: "九月", reading: "くがつ" },
+       { kanji: "九日", reading: "ここのか" },
+       { kanji: "九州", reading: "きゅうしゅう" },
+       { kanji: "十", reading: "じゅう" },
+       { kanji: "十日", reading: "とおか" },
+       { kanji: "十月", reading: "じゅうがつ" },
+       { kanji: "十分な", reading: "じゅうぶんな" },
+       { kanji: "百", reading: "ひゃく" },
+       { kanji: "三百", reading: "さんびゃく" },
+       { kanji: "六百", reading: "ろっぴゃく" },
+       { kanji: "百科事典", reading: "ひゃっかじてん" },
+       { kanji: "千", reading: "せん" },
+       { kanji: "二千", reading: "にせん" },
+       { kanji: "三千", reading: "さんぜん" },
+       { kanji: "千葉県", reading: "ちばけん" },
+       { kanji: "万", reading: "まん" },
+       { kanji: "万国", reading: "ばんこく" },
+       { kanji: "万年筆", reading: "まんねんひつ" },
+       { kanji: "円", reading: "えん" },
+       { kanji: "四万円", reading: "よんまんえん" },
+       { kanji: "円高", reading: "えんだか" },
+       { kanji: "年", reading: "とし" },
+       { kanji: "二千年", reading: "にせんねん" },
+       { kanji: "来年", reading: "らいねん" },
+       { kanji: "上", reading: "うえ」" },
+       { kanji: "上がる", reading: "あがる" },
+       { kanji: "水上スキー", reading: "すいじょうスキー" },
+       { kanji: "上着", reading: "うわぎ" },
+       { kanji: "下", reading: "した" },
+       { kanji: "下がる", reading: "さがる" },
+       { kanji: "上下", reading: "じょうげ" },
+       { kanji: "地下鉄 ", reading: "ちかてつ " },
+       { kanji: "中", reading: "なか" },
+       { kanji: "一日中", reading: "いちにちじゅう" },
+       { kanji: "中学 ", reading: "ちゅうがく" },
+       { kanji: "中心", reading: "ちゅうしん" },
+       { kanji: "半年", reading: "はんとし" },
+       { kanji: "半分", reading: "はんぶん " },
+       { kanji: "四時半 ", reading: "よじはん " },
+       { kanji: "半日", reading: "はんにち" },
+       { kanji: "分ける", reading: "わける" },
+       { kanji: "分かる", reading: "わかる" },
+       { kanji: "十分", reading: "じゅっぷん" },
+       { kanji: "十分な", reading: "じゅうぶんな" },
+       { kanji: "人", reading: "ひと" },
+       { kanji: "一人", reading: "ひとり" },
+       { kanji: "三人", reading: "さんにん" },
+       { kanji: "日本人", reading: "にほんじん" },
+       { kanji: "子ども", reading: "こども" },
+       { kanji: "女子", reading: "じょし" },
+       { kanji: "親子", reading: "おやこ" },
+       { kanji: "調子", reading: "ちょうし" },
+       { kanji: "女の人", reading: "おんなのひと" },
+       { kanji: "女の子", reading: "おんなのこ" },
+       { kanji: "女性", reading: "じょせい " },
+       { kanji: "男の子", reading: "おとこのこ" },
+       { kanji: "男女", reading: "だんじょ" },
+       { kanji: "⾧男", reading: "ちょうなん" },
+       { kanji: "男性", reading: "だんせい" },
+       { kanji: "目", reading: "め" },
+       { kanji: "一日目", reading: "いちにちめ" },
+       { kanji: "目薬", reading: "めぐすり" },
+       { kanji: "目的", reading: "もくてき" },
+       { kanji: "口", reading: "くち" },
+       { kanji: "入口", reading: "いりぐち" },
+       { kanji: "人口", reading: "じんこう" },
+       { kanji: "非常口", reading: "ひじょうぐち" },
+       { kanji: "耳", reading: "みみ" },
+       { kanji: "耳鼻科", reading: "じびか" },
+       { kanji: "手", reading: "て" },
+       { kanji: "上手な ", reading: "じょうずな " },
+       { kanji: "下手な ", reading: "へたな" },
+       { kanji: "手紙", reading: "てがみ" },
+       { kanji: "足", reading: "あし" },
+       { kanji: "一足", reading: "いっそく" },
+       { kanji: "足りる", reading: "たりる" },
+       { kanji: "遠足", reading: "えんそく" },
+       { kanji: "力", reading: "ちから" },
+       { kanji: "水力", reading: "すいりょく" },
+       { kanji: "体力", reading: "たいりょく " },
+       { kanji: "父", reading: "ちち" },
+       { kanji: "お父さん", reading: "おとうさん" },
+       { kanji: "父親", reading: "ちちおや" },
+       { kanji: "母", reading: "はは" },
+       { kanji: "お母さん", reading: "おかあさん" },
+       { kanji: "父母", reading: "ふぼ" },
+       { kanji: "母国", reading: "ぼこく" },
+       { kanji: "先", reading: "さき" },
+       { kanji: "先月", reading: "せんげつ" },
+       { kanji: "先輩", reading: "せんぱい" },
+       { kanji: "生まれる", reading: "うまれる" },
+       { kanji: "先生", reading: "せんせい" },
+       { kanji: "生きる", reading: "いきる" },
+       { kanji: "生活", reading: "せいかつ" },
+       { kanji: "学生", reading: "がくせい" },
+       { kanji: "大学", reading: "だいがく" },
+       { kanji: "科学", reading: "かがく" },
+       { kanji: "留学する", reading: "りゅうがくする" },
+       { kanji: "学校", reading: "がっこう" },
+       { kanji: "校⾧", reading: "こうちょう" },
+       { kanji: "小学校", reading: "しょうがっこう" },
+       { kanji: "母校", reading: "ぼこう" },
+       { kanji: "友達", reading: "ともだち" },
+       { kanji: "友人", reading: "ゆうじん" },
+       { kanji: "親友", reading: "しんゆう" },
+       { kanji: "本", reading: "ほん" },
+       { kanji: "日本", reading: "にほん" },
+       { kanji: "本屋", reading: "ほんや" },
+       { kanji: "山本さん ", reading: "やまもとさん " },
+       { kanji: "毎日", reading: "まいにち" },
+       { kanji: "毎月", reading: "まいげつ" },
+       { kanji: "毎年", reading: "まいとし" },
+       { kanji: "毎朝", reading: "まいあさ" },
+       { kanji: "何", reading: "なに" },
+       { kanji: "何月", reading: "なんがつ" },
+       { kanji: "何人", reading: "なんにん" },
+       { kanji: "何時", reading: "なんじ" },
+       { kanji: "前", reading: "まえ" },
+       { kanji: "三日前", reading: "みっかまえ" },
+       { kanji: "名前", reading: "なまえ" },
+       { kanji: "前半", reading: "ぜんはん" },
+       { kanji: "後", reading: "あと" },
+       { kanji: "後ろ", reading: "うしろ" },
+       { kanji: "前後", reading: "ぜんご" },
+       { kanji: "最後", reading: "さいご" },
+       { kanji: "外", reading: "そと" },
+       { kanji: "外国", reading: "ひだり" },
+       { kanji: "左手", reading: "ひだりて" },
+       { kanji: "左側", reading: "ひだりがわ" },
+       { kanji: "右", reading: "みぎ" },
+       { kanji: "右手", reading: "みぎて" },
+       { kanji: "左右", reading: "さゆう" },
+       { kanji: "右側", reading: "みぎがわ" },
+       { kanji: "東", reading: "みぎて" },
+       { kanji: "東口", reading: "ひがしぐち" },
+       { kanji: "東京", reading: "東京" },
+       { kanji: "東洋", reading: "とうよう" },
+       { kanji: "西", reading: "にし" },
+       { kanji: "西口", reading: "にしぐち" },
+       { kanji: "東西", reading: "とうざい" },
+       { kanji: "西洋", reading: "せいよう" },
+       { kanji: "南", reading: "みなみ" },
+       { kanji: "南口", reading: "みなみぐち" },
+       { kanji: "東南アジア", reading: "とうなんアジア" },
+       { kanji: "南極", reading: "なんきょく" },
+       { kanji: "北", reading: "きた" },
+       { kanji: "北口", reading: "きたぐち" },
+       { kanji: "南北", reading: "なんぼく" },
+       { kanji: "北海道", reading: "ほっかいどう" },
+       { kanji: "名前", reading: "なまえ" },
+       { kanji: "十名", reading: "じゅうめい" },
+       { kanji: "有名な", reading: "ゆうめいな" },
+       { kanji: "人名", reading: "じんめい" },
+       { kanji: "牛", reading: "うし" },
+       { kanji: "水牛", reading: "すいぎゅう" },
+       { kanji: "牛肉", reading: "ぎゅうにく" },
+       { kanji: "牛乳", reading: "ぎゅうにゅう" },
+       { kanji: "馬", reading: "うま" },
+       { kanji: "馬車", reading: "ばしゃ" },
+       { kanji: "トロイの木馬 ", reading: "トロイのもくば " },
+       { kanji: "乗馬", reading: "じょうば " },
+       { kanji: "魚", reading: "さかな" },
+       { kanji: "金魚", reading: "きんぎょ" },
+       { kanji: "人魚", reading: "にんぎょ" },
+       { kanji: "貝", reading: "かい" },
+       { kanji: "雨", reading: "あめ" },
+       { kanji: "大雨", reading: "おおあめ" },
+       { kanji: "雨季", reading: "うき" },
+       { kanji: "空", reading: "そら" },
+       { kanji: "天気", reading: "てんき" },
+       { kanji: "天国", reading: "てんごく" },
+       { kanji: "天気", reading: "てんき" },
+       { kanji: "人気", reading: "にんき" },
+       { kanji: "気をつける", reading: "きをつける" },
+       { kanji: "気持ち", reading: "きもち" },
+       { kanji: "車", reading: "くるま" },
+       { kanji: "電車", reading: "でんしゃ" },
+       { kanji: "自動車", reading: "じどうしゃ" },
+       { kanji: "門", reading: "もん" },
+       { kanji: "正門", reading: "せいもん" },
+       { kanji: "専門", reading: "せんもん" },
+       { kanji: "午前", reading: "ごぜん" },
+       { kanji: "午後", reading: "ごご" },
+       { kanji: "大きい", reading: "おおきい" },
+       { kanji: "大学", reading: "だいがく" },
+       { kanji: "アジア大家", reading: "あじあたいかい" },
+       { kanji: "大人", reading: "おとな" },
+       { kanji: "小さい", reading: "ちいさい" },
+       { kanji: "小川", reading: "おがわ" },
+       { kanji: "小学校", reading: "しょうがっこう" },
+       { kanji: "子犬", reading: "こいぬ" },
+       { kanji: "高い", reading: "たかい" },
+       { kanji: "高校生", reading: "こうこうせい" },
+       { kanji: "円高", reading: "えんだか" },
+       { kanji: "安い", reading: "やすい" },
+       { kanji: "安心する", reading: "あんしんする" },
+       { kanji: "安全", reading: "あんぜん" },
+       { kanji: "新しい", reading: "あたらしい" },
+       { kanji: "新聞", reading: "しんぶん" },
+       { kanji: "新人", reading: "しんじん" },
+
+       { kanji: "新年", reading: "しんねん" },{ kanji: "古い", reading: "ふるい" },
+       { kanji: "中古車", reading: "ちゅうこしゃ" },
+       { kanji: "長い", reading: "ながい" },
+       { kanji: "社長", reading: "しゃちょう" },
+       { kanji: "学長", reading: "がくちょう" },
+       { kanji: "校長", reading: "こうちょう" },
+       { kanji: "多い", reading: "おおい" },
+       { kanji: "多少", reading: "たしょう" },
+       { kanji: "多数決", reading: "たすうけつ" },
+       { kanji: "少ない", reading: "すくない" },
+       { kanji: "少し", reading: "すこし" },
+       { kanji: "少年", reading: "しょうねん" },
+       { kanji: "少女", reading: "しょうじょ" },
+       { kanji: "早い", reading: "はやい" },
+       { kanji: "早朝", reading: "そうちょう" },
+       { kanji: "早送り", reading: "はやおくり" },
+       { kanji: "行く", reading: "いく" },
+       { kanji: "生き方", reading: "いきかた" },
+       { kanji: "銀行", reading: "ぎんこう" },
+       { kanji: "三行目", reading: "さんぎょうめ" },
+       { kanji: "来る", reading: "くる" },
+       { kanji: "来年", reading: "らいねん" },
+
+       { kanji: "来週", reading: "らいしゅう" },{ kanji: "将来", reading: "しょうらい" },
+       { kanji: "食べる", reading: "たべる" },
+       { kanji: "外食する", reading: "がいしょくする" },
+       { kanji: "食料品", reading: "しょくりょうひん" },
+       { kanji: "食堂", reading: "しょくどう" },
+       { kanji: "見る", reading: "みる" },
+ { kanji: "見せる", reading: "みせる" },
+{ kanji: "見学する", reading: "けんがくする" },
+{ kanji: "意見", reading: "いけん" },
+{ kanji: "入る", reading: "はいる" },
+{ kanji: "入れる", reading: "いれる" },
+{ kanji: "入口", reading: "いりぐち" },
+{ kanji: "入学する", reading: "にゅうがくする" },
+{ kanji: "出る", reading: "でる" },
+{ kanji: "出す", reading: "だす" },
+{ kanji: "出口", reading: "でぐち" },
+{ kanji: "出席する", reading: "しゅっせきする" },
+{ kanji: "たつ", reading: "たつ" },
+{ kanji: "立食パーティー", reading: "立食パーティー" },
+{ kanji: "国立大学", reading: "こくりつだいがく" },
+{ kanji: "書く", reading: "かく" },
+{ kanji: "読書", reading: "どくしょ" },
+{ kanji: "下書き", reading: "したがき" },
+{ kanji: "辞書", reading: "じしょ" },
+{ kanji: "言う", reading: "いう" },
+{ kanji: "言語", reading: "げんご" },
+{ kanji: "伝言", reading: "でんごん" },
+{ kanji: "飲む", reading: "のむ" },
+{ kanji: "飲み物", reading: "飲み物" },
+{ kanji: "飲食店", reading: "いんしょくてん" },
+ 
+{ kanji: "話す", reading: "はなす" },
+{ kanji: "でんわ", reading: "でんわ" },
+{ kanji: "会話", reading: "かいわ" },
+{ kanji: "日本語", reading: "にほんご" },
+{ kanji: "中国語", reading: "ちゅうごくご" },
+{ kanji: "外国語", reading: "がいこくご" },
+{ kanji: "間", reading: "あいだ" },
+{ kanji: "時間", reading: "じかん" },
+{ kanji: "一年間", reading: "いちねんかん" },
+{ kanji: "間に合う", reading: "あにあう" },
+{ kanji: "聞く", reading: "きく" },
+{ kanji: "聞こえる", reading: "きこえる" },
+{ kanji: "新聞", reading: "しんぶん" },
+{ kanji: "買う", reading: "かう" },
+{ kanji: "買い物する", reading: "かいものする" },
+{ kanji: "売買する", reading: "ばいばいする" },
+{ kanji: "休み", reading: "やすみ" },
+{ kanji: "休む", reading: "やすむ" },
+{ kanji: "夏休み", reading: "なつやすみ" },
+{ kanji: "時", reading: "とき" },
+{ kanji: "四時", reading: "よじ" },
+{ kanji: "一時間", reading: "いちじかん" },
+{ kanji: "一週間", reading: "いっしゅうかん" },
+{ kanji: "来週", reading: "らいしゅう" },
+{ kanji: "先週", reading: "せんしゅう" },
+{ kanji: "今週", reading: "こんしゅう" },
+{ kanji: "道", reading: "みち" },
+{ kanji: "車道", reading: "しゃどう" },
+{ kanji: "水道", reading: "すいどう" },
+{ kanji: "書道", reading: "しょどう" },
+{ kanji: "今", reading: "いま" },
+{ kanji: "今年", reading: "ことし" },
+{ kanji: "会う", reading: "あう" },
+{ kanji: "新年会", reading: "しんねんかい" },
+{ kanji: "会議", reading: "かいぎ" },
+{ kanji: "社会", reading: "しゃかい" },
+{ kanji: "会社", reading: "かいしゃ" },
+{ kanji: "社長", reading: "しゃちょう" },
+{ kanji: "神社", reading: "じんじゃ" },
+{ kanji: "店", reading: "みせ" },
+{ kanji: "店員", reading: "てんいん" },
+{ kanji: "売店", reading: "ばいてん" },
+{ kanji: "駅", reading: "えき" },
+{ kanji: "駅長", reading: "えきちょう" },
+{ kanji: "駅前", reading: "えきまえ" },
+{ kanji: "花", reading: "はな" },
+{ kanji: "花火", reading: "はなび" },
+{ kanji: "花見", reading: "はなみ" },
+{ kanji: "花屋", reading: "はなや" },
+{ kanji: "国", reading: "くに" },
+{ kanji: "外国", reading: "がいこく" },
+{ kanji: "国際会議", reading: "こくさいかいぎ" },
+{ kanji: "しろい", reading: "しろい" },
+{ kanji: "真っ白", reading: "まっしろ" },
+{ kanji: "白書", reading: "はくしょ" },
+{ kanji: "空", reading: "そら" },
+{ kanji: "空気", reading: "くうき" },
+{ kanji: "大空", reading: "おおぞら" },
+{ kanji: "空港", reading: "くうこう" },
+{ kanji: "電車", reading: "でんしゃ" },
+{ kanji: "電気", reading: "でんき" },
+{ kanji: "電池", reading: "でんち" },
+{ kanji: "読む", reading: "よむ" }
+       
+
+    ];
+
+    let current = 0;
+    let history = [];
+
+    function updateCard() {
+      const card = document.getElementById("kanji");
+      const reading = document.getElementById("reading");
+      const currentCard = flashcards[current];
+
+      card.textContent = currentCard.kanji;
+      reading.textContent = "";  // Hide reading initially
+    }
+
+    function showReading() {
+      const reading = document.getElementById("reading");
+      reading.textContent = flashcards[current].reading;
+      reading.style.opacity = '1';
+    }
+
+    function hideReading() {
+      const reading = document.getElementById("reading");
+      reading.textContent = "";
+      reading.style.opacity = '0';
+    }
+
+    function nextCard() {
+      history.push(current);
+      current = (current + 1) % flashcards.length;  // Loop back to the first card after the last one
+      updateCard();
+    }
+
+    function previousCard() {
+      if (history.length > 0) {
+        current = history.pop();
+        updateCard();
+      } else {
+        alert("No previous card!");
+      }
+    }
+
+    updateCard();
+  </script>
+
+</body>
+</html>
+
+
